@@ -4,18 +4,14 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-console.log("Hello from Functions!");
+import { Hono } from "jsr:@hono/hono";
 
-Deno.serve(async (req) => {
-  const name = req.method;
-  const data = {
-    message: `Hello ${name}!`,
-  };
+const functionName = "hello-world";
+const app = new Hono().basePath(`/${functionName}`);
 
-  return new Response(JSON.stringify(data), {
-    headers: { "Content-Type": "application/json" },
-  });
-});
+app.get("/", (c) => c.text("Hello from hono-server!"));
+
+Deno.serve(app.fetch);
 
 /* To invoke locally:
 
