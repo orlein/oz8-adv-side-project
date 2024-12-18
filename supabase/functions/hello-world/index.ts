@@ -9,18 +9,34 @@ import { Hono } from "jsr:@hono/hono";
 const functionName = "hello-world";
 const app = new Hono().basePath(`/${functionName}`);
 
-app.get("/", (c) => c.text("Hello from hono-server!"));
+const fetchToGov = async (startIdx: string, endIdx: string) => {
+  const baseUrl = "https://foodsafetykorea.go.kr/api";
+  const keyId = "6c90c288cab14cfda622";
+  const serviceId = "I0470";
+  const dataType = "json";
+  const url = new URL(
+    `${baseUrl}/${keyId}/${serviceId}/${dataType}/${startIdx}/${endIdx}`,
+    baseUrl
+  );
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return await response.text();
+};
+
+app.get("/", async (c) => {
+  try {
+    const { startIdx, endIdx } = c.req.query();
+    const data = await fetchToGov(startIdx, endIdx);
+    return new Response(data);
+  } catch (error) {
+    return new Response(JSON.stringify(error), { status: 500 });
+  }
+});
 
 Deno.serve(app.fetch);
-
-/* To invoke locally:
-
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
-
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/hello-world' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-    --header 'Content-Type: application/json' \
-    --data '{"name":"Functions"}'
-
-*/
