@@ -10,7 +10,7 @@ const functionName = "hello-world";
 const app = new Hono().basePath(`/${functionName}`);
 
 const fetchToGov = async (startIdx: string, endIdx: string) => {
-  const baseUrl = "https://foodsafetykorea.go.kr/api";
+  const baseUrl = "https://openapi.foodsafetykorea.go.kr/api";
   const keyId = "6c90c288cab14cfda622";
   const serviceId = "I0470";
   const dataType = "json";
